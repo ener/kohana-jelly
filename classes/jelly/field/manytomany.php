@@ -120,32 +120,34 @@ implements Jelly_Field_Behavior_Saveable, Jelly_Field_Behavior_Haveable, Jelly_F
 		return $this->_ids($value);
 	}
 
-	/**
-	 * Returns a pre-built Jelly model ready to be loaded
-	 *
-	 * @param   Jelly_Model  $model
-	 * @param   mixed        $value
-	 * @param   boolean      $loaded
-	 * @return  void
-	 */
-	public function get($model, $value)
-	{
-		// If the value hasn't changed, we need to pull from the database
-		if ($model->changed($this->name))
-		{
-			return Jelly::select($this->foreign['model'])
-					->where($this->foreign['column'], 'IN', $value);
-		}
+	  /**
+     * Returns a pre-built Jelly model ready to be loaded
+     *
+     * @param   Jelly_Model  $model
+     * @param   mixed        $value
+     * @param   boolean      $loaded
+     * @return  void
+     */
+    public function get($model, $value) {
+        // If the value hasn't changed, we need to pull from the database
+        if ($model->changed($this->name)) {
+            // Black magic
+            if (!is_null($value)) {
+                return Jelly::select($this->foreign['model'])
+                        ->where($this->foreign['column'], 'IN', $value);
+            }
 
-		$join_col1 = $this->through['model'].'.'.$this->through['columns'][1];
-		$join_col2 = $this->foreign['model'].'.'.$this->foreign['column'];
-		$where_col = $this->through['model'].'.'.$this->through['columns'][0];
+        }
 
-		return Jelly::select($this->foreign['model'])
-					->join($this->through['model'])
-					->on($join_col1, '=', $join_col2)
-					->where($where_col, '=', $model->id());
-	}
+        $join_col1 = $this->through['model'] . '.' . $this->through['columns'][1];
+        $join_col2 = $this->foreign['model'] . '.' . $this->foreign['column'];
+        $where_col = $this->through['model'] . '.' . $this->through['columns'][0];
+
+        return Jelly::select($this->foreign['model'])
+                ->join($this->through['model'])
+                ->on($join_col1, '=', $join_col2)
+                ->where($where_col, '=', $model->id());
+    }
 
 	/**
 	 * Implementation for Jelly_Field_Behavior_Saveable.
